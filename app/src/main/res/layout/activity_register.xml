@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/app_background">
+
+    <ImageView
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/epbe_logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="14dp"
+        android:text="@string/app_tagline"
+        android:textColor="@color/app_text_secondary"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/register_title"
+        android:textColor="@color/app_text_primary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp" />
+
+    <EditText
+        android:id="@+id/registerUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:inputType="text"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary"
+        android:background="@drawable/custom_input_bg"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/registerPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary"
+        android:background="@drawable/custom_input_bg"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/registerConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary"
+        android:background="@drawable/custom_input_bg"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/registerBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:text="@string/register_button"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/app_button"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:cornerRadius="20dp"
+        android:padding="15dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/gotoLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/go_to_login"
+        android:textStyle="bold"
+        android:textColor="@color/app_text_primary"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

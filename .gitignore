@@ -1,0 +1,29 @@
+# Android/Gradle generated output
+.gradle/
+**/build/
+
+# Local machine configuration
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Native build and generated intermediates
+.externalNativeBuild/
+.cxx/
+
+# Logs
+*.log
+
+# Build artifacts
+*.apk
+*.aab
+
+# Signing keys and secrets
+*.jks
+*.keystore
+
+# OS files
+.DS_Store
+Thumbs.db
