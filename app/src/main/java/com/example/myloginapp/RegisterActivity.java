@@ -114,6 +114,6 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // databaseHelper doesn't need to be closed for Firebase
+
     }
 }

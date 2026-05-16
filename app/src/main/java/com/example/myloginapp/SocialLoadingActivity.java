@@ -55,7 +55,7 @@ public class SocialLoadingActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Exception e) {
-                    // Ignore for now
+
                 }
             });
         }, 2000);
@@ -64,6 +64,6 @@ public class SocialLoadingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // No db close needed for Firebase
+
     }
 }

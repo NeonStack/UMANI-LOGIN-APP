@@ -8,7 +8,7 @@ public class User {
     public int isDeleted;
     public String profileImageUrl;
 
-    // Required for Firebase DataSnapshot.getValue(User.class)
+
     public User() {
     }
 

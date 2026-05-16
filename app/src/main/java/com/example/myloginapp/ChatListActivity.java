@@ -48,14 +48,12 @@ public class ChatListActivity extends AppCompatActivity {
                     friendView.setTextColor(android.graphics.Color.parseColor("#1F2937"));
                     friendView.setPadding(32, 48, 32, 48);
                     friendView.setBackgroundResource(R.drawable.menu_card_bg);
-                    
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT, 
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     );
                     params.setMargins(0, 0, 0, 24);
                     friendView.setLayoutParams(params);
-                    
                     friendView.setOnClickListener(v -> {
                         Intent intent = new Intent(ChatListActivity.this, ChatActivity.class);
                         intent.putExtra("FRIEND_USERNAME", friend);
@@ -68,7 +66,7 @@ public class ChatListActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                // handle error
+
             }
         });
     }

@@ -71,7 +71,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // Load profiles first, then attach real-time chat listener
+
         profileImageStore.getProfileImage(currentUsername, new FirebaseCallback<String>() {
             @Override
             public void onSuccess(String url1) {
@@ -119,7 +119,6 @@ public class ChatActivity extends AppCompatActivity {
 
         LinearLayout rowLayout = new LinearLayout(this);
         rowLayout.setOrientation(LinearLayout.HORIZONTAL);
-        
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -129,7 +128,6 @@ public class ChatActivity extends AppCompatActivity {
 
         ImageView profileIcon = new ImageView(this);
         String imageUri = sender.equals(currentUsername) ? currentProfileUrl : friendProfileUrl;
-        
         if (imageUri != null && !imageUri.isEmpty()) {
             if (imageUri.startsWith("http")) {
                 Glide.with(this).load(imageUri).into(profileIcon);
@@ -140,7 +138,6 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             profileIcon.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }
-        
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(100, 100);
         iconParams.setMargins(16, 0, 16, 0);
         profileIcon.setLayoutParams(iconParams);
@@ -153,7 +150,6 @@ public class ChatActivity extends AppCompatActivity {
         msgView.setTextSize(16f);
         msgView.setTextColor(android.graphics.Color.parseColor("#1F2937"));
         msgView.setPadding(32, 24, 32, 24);
-        
         LinearLayout.LayoutParams msgParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -161,19 +157,18 @@ public class ChatActivity extends AppCompatActivity {
         msgView.setLayoutParams(msgParams);
 
         if (sender.equals(currentUsername)) {
-            // Sent message (Right side)
+
             msgView.setBackgroundResource(R.drawable.menu_card_bg);
             rowLayout.setGravity(Gravity.END);
             rowLayout.addView(msgView);
             rowLayout.addView(profileIcon);
         } else {
-            // Received message (Left side)
-            msgView.setBackgroundColor(0xFFE0E0E0); // Light grey
+
+            msgView.setBackgroundColor(0xFFE0E0E0);
             rowLayout.setGravity(Gravity.START);
             rowLayout.addView(profileIcon);
             rowLayout.addView(msgView);
         }
-        
         messagesContainer.addView(rowLayout);
     }
 }

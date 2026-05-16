@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(Exception e) {
-                        // ignore or handle
+
                     }
                 });
             }
@@ -156,6 +156,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Firebase doesn't need to be explicitly closed
+
     }
 }

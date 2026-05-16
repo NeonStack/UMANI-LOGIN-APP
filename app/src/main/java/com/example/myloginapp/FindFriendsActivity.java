@@ -22,7 +22,6 @@ public class FindFriendsActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private SessionManager sessionManager;
     private String currentUsername;
-    
     private List<User> potentialFriends;
     private int currentIndex = 0;
 
@@ -76,7 +75,7 @@ public class FindFriendsActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                // handle error
+
             }
         });
     }
@@ -88,7 +87,6 @@ public class FindFriendsActivity extends AppCompatActivity {
         if (potentialFriends != null && currentIndex < potentialFriends.size()) {
             User user = potentialFriends.get(currentIndex);
             cardName.setText(user.username);
-            
             if (user.profileImageUrl != null && !user.profileImageUrl.isEmpty()) {
                 if (user.profileImageUrl.startsWith("http")) {
                     Glide.with(this).load(user.profileImageUrl).into(cardImage);
@@ -99,7 +97,6 @@ public class FindFriendsActivity extends AppCompatActivity {
             } else {
                 cardImage.setImageResource(R.drawable.ic_baseline_account_circle_24);
             }
-            
             cardContainer.setVisibility(View.VISIBLE);
             noUsersText.setVisibility(View.GONE);
         } else {

@@ -114,7 +114,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Exception e) {
-                    // Ignore
+
                 }
             });
         });
@@ -130,6 +130,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // No DB close needed
+
     }
 }

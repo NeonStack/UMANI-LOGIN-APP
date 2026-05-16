@@ -6,7 +6,7 @@ public class Message {
     public String content;
     public long timestamp;
 
-    // Required for Firebase DataSnapshot.getValue(Message.class)
+
     public Message() {
     }
 

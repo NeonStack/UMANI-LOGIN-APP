@@ -122,6 +122,6 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // No need to close DB
+
     }
 }

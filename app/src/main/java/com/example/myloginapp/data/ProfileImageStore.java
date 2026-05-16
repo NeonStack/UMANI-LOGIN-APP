@@ -31,8 +31,7 @@ public class ProfileImageStore {
         try {
             InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
             Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-            
-            // Downscale to save space in Realtime Database
+
             int MAX_SIZE = 500;
             float ratio = Math.min(
                     (float) MAX_SIZE / selectedImage.getWidth(),
@@ -46,7 +45,7 @@ public class ProfileImageStore {
             byte[] b = baos.toByteArray();
             String base64Image = Base64.encodeToString(b, Base64.DEFAULT);
 
-            // Store as base64 string
+
             usersRef.child(username).child("profileImageUrl").setValue(base64Image)
                     .addOnSuccessListener(aVoid -> callback.onSuccess(base64Image))
                     .addOnFailureListener(callback::onError);

@@ -89,7 +89,7 @@ public class DashboardActivity extends AppCompatActivity {
             goToLogin();
         });
 
-        // Listen for new messages
+
         databaseHelper.listenForNotifications(currentUsername, new FirebaseCallback<String>() {
             @Override
             public void onSuccess(String sender) {
@@ -140,6 +140,6 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // No DB close needed
+
     }
 }

@@ -157,7 +157,7 @@ public class DatabaseHelper {
         });
     }
 
-    // --- New Features: Tinder Swipe & Chat ---
+
 
     public void getAllOtherUsers(String currentUsername, FirebaseCallback<List<User>> callback) {
         getFriends(currentUsername, new FirebaseCallback<List<String>>() {
@@ -201,13 +201,13 @@ public class DatabaseHelper {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<String> friends = new ArrayList<>();
-                // People I liked
+
                 if (snapshot.hasChild(currentUsername)) {
                     for (DataSnapshot friendSnap : snapshot.child(currentUsername).getChildren()) {
                         friends.add(friendSnap.getKey());
                     }
                 }
-                // People who liked me
+
                 for (DataSnapshot userSnap : snapshot.getChildren()) {
                     if (userSnap.hasChild(currentUsername) && !friends.contains(userSnap.getKey())) {
                         friends.add(userSnap.getKey());
@@ -234,7 +234,6 @@ public class DatabaseHelper {
     public void addMessage(String sender, String receiver, String content, FirebaseCallback<Boolean> callback) {
         String chatId = getChatId(sender, receiver);
         Message message = new Message(sender, receiver, content, System.currentTimeMillis());
-        
         messagesRef.child(chatId).push().setValue(message)
                 .addOnSuccessListener(aVoid -> {
                     usersRef.child(receiver).child("lastMessageNotification").setValue(sender + ":" + System.currentTimeMillis());
@@ -250,12 +249,12 @@ public class DatabaseHelper {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (isFirstLoad) {
                     isFirstLoad = false;
-                    return; // Ignore the first cached load
+                    return;
                 }
                 if (snapshot.exists()) {
                     String val = snapshot.getValue(String.class);
                     if (val != null && val.contains(":")) {
-                        callback.onSuccess(val.split(":")[0]); // Return the sender's username
+                        callback.onSuccess(val.split(":")[0]);
                     }
                 }
             }
@@ -267,7 +266,6 @@ public class DatabaseHelper {
     public DatabaseReference getMessagesReference(String user1, String user2) {
         return messagesRef.child(getChatId(user1, user2));
     }
-    
     public void updateUserProfileImage(String username, String url, FirebaseCallback<Boolean> callback) {
         usersRef.child(username).child("profileImageUrl").setValue(url)
                 .addOnSuccessListener(aVoid -> callback.onSuccess(true))
