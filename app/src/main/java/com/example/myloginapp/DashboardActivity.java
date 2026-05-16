@@ -8,11 +8,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.ProfileImageStore;
 import com.example.myloginapp.data.SessionManager;
 import com.example.myloginapp.ui.UiDialogHelper;
+import com.bumptech.glide.Glide;
+import android.util.Base64;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -84,6 +88,16 @@ public class DashboardActivity extends AppCompatActivity {
             sessionManager.clearSession();
             goToLogin();
         });
+
+        // Listen for new messages
+        databaseHelper.listenForNotifications(currentUsername, new FirebaseCallback<String>() {
+            @Override
+            public void onSuccess(String sender) {
+                Toast.makeText(DashboardActivity.this, "New message from " + sender + "!", Toast.LENGTH_LONG).show();
+            }
+            @Override
+            public void onError(Exception e) {}
+        });
     }
 
     @Override
@@ -93,12 +107,27 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void loadProfileImage() {
-        String savedUri = profileImageStore.getProfileImage(currentUsername);
-        if (savedUri == null) {
-            profileImageView.setImageResource(R.drawable.ic_baseline_account_circle_24);
-            return;
-        }
-        profileImageView.setImageURI(Uri.parse(savedUri));
+        profileImageStore.getProfileImage(currentUsername, new FirebaseCallback<String>() {
+            @Override
+            public void onSuccess(String url) {
+                if (isDestroyed() || isFinishing()) return;
+                if (url == null || url.isEmpty()) {
+                    profileImageView.setImageResource(R.drawable.ic_baseline_account_circle_24);
+                } else {
+                    if (url.startsWith("http")) {
+                        Glide.with(DashboardActivity.this).load(url).into(profileImageView);
+                    } else {
+                        byte[] decodedString = Base64.decode(url, Base64.DEFAULT);
+                        Glide.with(DashboardActivity.this).load(decodedString).into(profileImageView);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                profileImageView.setImageResource(R.drawable.ic_baseline_account_circle_24);
+            }
+        });
     }
 
     private void goToLogin() {
@@ -111,8 +140,6 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        // No DB close needed
     }
 }

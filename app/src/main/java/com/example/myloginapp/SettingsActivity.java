@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.ProfileImageStore;
 import com.example.myloginapp.data.SessionManager;
 import com.example.myloginapp.ui.UiDialogHelper;
+import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -60,23 +62,28 @@ public class SettingsActivity extends AppCompatActivity {
                     getString(R.string.delete_confirm_title),
                     getString(R.string.delete_confirm_message),
                     () -> {
-                        boolean deleted = databaseHelper.deleteUser(currentUsername);
-                        if (deleted) {
-                            profileImageStore.clearProfileImage(currentUsername);
-                            sessionManager.clearSession();
-                            UiDialogHelper.showStatus(
-                                    this,
-                                    UiDialogHelper.Type.SUCCESS,
-                                    getString(R.string.status_success),
-                                    getString(R.string.account_deleted),
-                                    () -> {
-                                        Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                            );
-                        }
+                        databaseHelper.deleteUser(currentUsername, new FirebaseCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean deleted) {
+                                if (deleted) {
+                                    sessionManager.clearSession();
+                                    UiDialogHelper.showStatus(
+                                            SettingsActivity.this,
+                                            UiDialogHelper.Type.SUCCESS,
+                                            getString(R.string.status_success),
+                                            getString(R.string.account_deleted),
+                                            () -> {
+                                                Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                    );
+                                }
+                            }
+                            @Override
+                            public void onError(Exception e) {}
+                        });
                     }
             );
         });
@@ -98,21 +105,23 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         Uri imageUri = data.getData();
-        final int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        try {
-            getContentResolver().takePersistableUriPermission(imageUri, flags);
-        } catch (SecurityException ignored) {}
+        Toast.makeText(this, "Uploading please wait...", Toast.LENGTH_SHORT).show();
 
-        profileImageStore.saveProfileImage(currentUsername, imageUri.toString());
-        
-        UiDialogHelper.showStatus(this, UiDialogHelper.Type.SUCCESS, "Success", "Profile picture updated!", null);
+        profileImageStore.uploadProfileImage(imageUri, currentUsername, new FirebaseCallback<String>() {
+            @Override
+            public void onSuccess(String url) {
+                UiDialogHelper.showStatus(SettingsActivity.this, UiDialogHelper.Type.SUCCESS, "Success", "Profile picture updated!", null);
+            }
+            @Override
+            public void onError(Exception e) {
+                UiDialogHelper.showStatus(SettingsActivity.this, UiDialogHelper.Type.ERROR, "Error", e.getMessage(), null);
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        // No need to close DB
     }
 }

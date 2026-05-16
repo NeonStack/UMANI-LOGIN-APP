@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.widget.EditText;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButton;
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.SessionManager;
 import com.example.myloginapp.ui.UiDialogHelper;
 
@@ -87,25 +89,34 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 return;
             }
 
-            boolean updated = databaseHelper.updatePassword(username, currentPassword, newPassword);
-            if (!updated) {
-                UiDialogHelper.showStatus(
-                        this,
-                        UiDialogHelper.Type.ERROR,
-                        getString(R.string.status_error),
-                        getString(R.string.error_wrong_current_password),
-                        null
-                );
-                return;
-            }
+            databaseHelper.updatePassword(username, currentPassword, newPassword, new FirebaseCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean updated) {
+                    if (!updated) {
+                        UiDialogHelper.showStatus(
+                                ChangePasswordActivity.this,
+                                UiDialogHelper.Type.ERROR,
+                                getString(R.string.status_error),
+                                getString(R.string.error_wrong_current_password),
+                                null
+                        );
+                        return;
+                    }
 
-            UiDialogHelper.showStatus(
-                    this,
-                    UiDialogHelper.Type.SUCCESS,
-                    getString(R.string.status_success),
-                    getString(R.string.password_changed),
-                    this::finish
-            );
+                    UiDialogHelper.showStatus(
+                            ChangePasswordActivity.this,
+                            UiDialogHelper.Type.SUCCESS,
+                            getString(R.string.status_success),
+                            getString(R.string.password_changed),
+                            ChangePasswordActivity.this::finish
+                    );
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    // Ignore
+                }
+            });
         });
     }
 
@@ -119,8 +130,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        // No DB close needed
     }
 }

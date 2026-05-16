@@ -9,8 +9,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.myloginapp.data.DatabaseHelper;
-import com.example.myloginapp.data.ProfileImageStore;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.SessionManager;
+import com.example.myloginapp.data.User;
+import com.bumptech.glide.Glide;
+import android.util.Base64;
 
 import java.util.List;
 
@@ -18,10 +21,9 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
     private SessionManager sessionManager;
-    private ProfileImageStore profileImageStore;
     private String currentUsername;
     
-    private List<String> potentialFriends;
+    private List<User> potentialFriends;
     private int currentIndex = 0;
 
     private View cardContainer;
@@ -36,7 +38,6 @@ public class FindFriendsActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
         sessionManager = new SessionManager(this);
-        profileImageStore = new ProfileImageStore(this);
         currentUsername = sessionManager.getUsername();
 
         cardContainer = findViewById(R.id.cardContainer);
@@ -44,13 +45,19 @@ public class FindFriendsActivity extends AppCompatActivity {
         cardName = findViewById(R.id.cardName);
         noUsersText = findViewById(R.id.noUsersText);
 
-        findViewById(R.id.btnPass).setOnClickListener(v -> nextCard());
+        findViewById(R.id.btnPass).setOnClickListener(v -> nextCard(false));
         findViewById(R.id.btnLike).setOnClickListener(v -> {
-            if (currentIndex < potentialFriends.size()) {
-                String likedUser = potentialFriends.get(currentIndex);
-                databaseHelper.addFriend(currentUsername, likedUser);
-                Toast.makeText(this, "Liked " + likedUser + "!", Toast.LENGTH_SHORT).show();
-                nextCard();
+            if (potentialFriends != null && currentIndex < potentialFriends.size()) {
+                User likedUser = potentialFriends.get(currentIndex);
+                databaseHelper.addFriend(currentUsername, likedUser.username, new FirebaseCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean success) {
+                        Toast.makeText(FindFriendsActivity.this, "Liked " + likedUser.username + "!", Toast.LENGTH_SHORT).show();
+                        nextCard(true);
+                    }
+                    @Override
+                    public void onError(Exception e) {}
+                });
             }
         });
 
@@ -58,19 +65,37 @@ public class FindFriendsActivity extends AppCompatActivity {
     }
 
     private void loadUsers() {
-        potentialFriends = databaseHelper.getAllOtherUsers(currentUsername);
-        currentIndex = 0;
-        showCurrentCard();
+        databaseHelper.getAllOtherUsers(currentUsername, new FirebaseCallback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> users) {
+                if (isDestroyed() || isFinishing()) return;
+                potentialFriends = users;
+                currentIndex = 0;
+                showCurrentCard();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                // handle error
+            }
+        });
     }
 
     private void showCurrentCard() {
-        if (currentIndex < potentialFriends.size()) {
-            String user = potentialFriends.get(currentIndex);
-            cardName.setText(user);
+        cardContainer.setTranslationX(0f);
+        cardContainer.setAlpha(1f);
+
+        if (potentialFriends != null && currentIndex < potentialFriends.size()) {
+            User user = potentialFriends.get(currentIndex);
+            cardName.setText(user.username);
             
-            String imageUri = profileImageStore.getProfileImage(user);
-            if (imageUri != null) {
-                cardImage.setImageURI(Uri.parse(imageUri));
+            if (user.profileImageUrl != null && !user.profileImageUrl.isEmpty()) {
+                if (user.profileImageUrl.startsWith("http")) {
+                    Glide.with(this).load(user.profileImageUrl).into(cardImage);
+                } else {
+                    byte[] decodedString = Base64.decode(user.profileImageUrl, Base64.DEFAULT);
+                    Glide.with(this).load(decodedString).into(cardImage);
+                }
             } else {
                 cardImage.setImageResource(R.drawable.ic_baseline_account_circle_24);
             }
@@ -83,14 +108,26 @@ public class FindFriendsActivity extends AppCompatActivity {
         }
     }
 
-    private void nextCard() {
-        currentIndex++;
-        showCurrentCard();
+    private void nextCard(boolean isLike) {
+        if (potentialFriends != null && currentIndex < potentialFriends.size()) {
+            float targetX = isLike ? 1000f : -1000f;
+            cardContainer.animate()
+                    .translationX(targetX)
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> {
+                        currentIndex++;
+                        showCurrentCard();
+                    })
+                    .start();
+        } else {
+            currentIndex++;
+            showCurrentCard();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        databaseHelper.close();
     }
 }

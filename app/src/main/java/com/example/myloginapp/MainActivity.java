@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 
 import com.google.android.material.button.MaterialButton;
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.SessionManager;
 import com.example.myloginapp.ui.UiDialogHelper;
 
@@ -92,27 +93,50 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        boolean isValidUser = databaseHelper.verifyUserCredentials(username, password);
-        if (!isValidUser) {
-            UiDialogHelper.showStatus(
-                    this,
-                    UiDialogHelper.Type.ERROR,
-                    getString(R.string.status_error),
-                    getString(R.string.error_login_failed),
-                    null
-            );
-            return;
-        }
+        databaseHelper.verifyUserCredentials(username, password, new FirebaseCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean isValidUser) {
+                if (!isValidUser) {
+                    UiDialogHelper.showStatus(
+                            MainActivity.this,
+                            UiDialogHelper.Type.ERROR,
+                            getString(R.string.status_error),
+                            getString(R.string.error_login_failed),
+                            null
+                    );
+                    return;
+                }
 
-        String provider = databaseHelper.getProviderForUser(username);
-        
-        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.success_sound);
-        mediaPlayer.start();
-        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+                databaseHelper.getProviderForUser(username, new FirebaseCallback<String>() {
+                    @Override
+                    public void onSuccess(String provider) {
+                        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.success_sound);
+                        mediaPlayer.start();
+                        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
 
-        sessionManager.saveSession(username, provider);
-        openDashboard(username, provider);
-        finish();
+                        sessionManager.saveSession(username, provider);
+                        openDashboard(username, provider);
+                        finish();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // ignore or handle
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                UiDialogHelper.showStatus(
+                        MainActivity.this,
+                        UiDialogHelper.Type.ERROR,
+                        "Database Error",
+                        e.getMessage(),
+                        null
+                );
+            }
+        });
     }
 
     private void openSocialLoading(String provider) {
@@ -132,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        // Firebase doesn't need to be explicitly closed
     }
 }

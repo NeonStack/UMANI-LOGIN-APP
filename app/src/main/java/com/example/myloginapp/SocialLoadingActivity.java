@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.widget.TextView;
 
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
 import com.example.myloginapp.data.SessionManager;
 
 public class SocialLoadingActivity extends AppCompatActivity {
@@ -39,23 +40,30 @@ public class SocialLoadingActivity extends AppCompatActivity {
 
         final String finalProvider = provider;
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            String username = databaseHelper.getOrCreateSocialUser(finalProvider);
-            sessionManager.saveSession(username, finalProvider);
+            databaseHelper.getOrCreateSocialUser(finalProvider, new FirebaseCallback<String>() {
+                @Override
+                public void onSuccess(String username) {
+                    sessionManager.saveSession(username, finalProvider);
 
-            Intent intent = new Intent(SocialLoadingActivity.this, DashboardActivity.class);
-            intent.putExtra(DashboardActivity.EXTRA_USERNAME, username);
-            intent.putExtra(DashboardActivity.EXTRA_PROVIDER, finalProvider);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                    Intent intent = new Intent(SocialLoadingActivity.this, DashboardActivity.class);
+                    intent.putExtra(DashboardActivity.EXTRA_USERNAME, username);
+                    intent.putExtra(DashboardActivity.EXTRA_PROVIDER, finalProvider);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    // Ignore for now
+                }
+            });
         }, 2000);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        // No db close needed for Firebase
     }
 }

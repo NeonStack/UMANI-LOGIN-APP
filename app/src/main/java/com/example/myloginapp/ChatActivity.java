@@ -1,23 +1,27 @@
 package com.example.myloginapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.myloginapp.data.DatabaseHelper;
+import com.example.myloginapp.data.FirebaseCallback;
+import com.example.myloginapp.data.Message;
 import com.example.myloginapp.data.ProfileImageStore;
 import com.example.myloginapp.data.SessionManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+import android.util.Base64;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -26,6 +30,9 @@ public class ChatActivity extends AppCompatActivity {
     private ProfileImageStore profileImageStore;
     private String currentUsername;
     private String friendUsername;
+
+    private String currentProfileUrl;
+    private String friendProfileUrl;
 
     private LinearLayout messagesContainer;
     private ScrollView chatScrollView;
@@ -53,87 +60,120 @@ public class ChatActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> {
             String text = messageInput.getText().toString().trim();
             if (!text.isEmpty()) {
-                databaseHelper.addMessage(currentUsername, friendUsername, text);
-                messageInput.setText("");
-                loadMessages();
+                databaseHelper.addMessage(currentUsername, friendUsername, text, new FirebaseCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean success) {
+                        messageInput.setText("");
+                    }
+                    @Override
+                    public void onError(Exception e) {}
+                });
             }
         });
 
-        loadMessages();
+        // Load profiles first, then attach real-time chat listener
+        profileImageStore.getProfileImage(currentUsername, new FirebaseCallback<String>() {
+            @Override
+            public void onSuccess(String url1) {
+                currentProfileUrl = url1;
+                profileImageStore.getProfileImage(friendUsername, new FirebaseCallback<String>() {
+                    @Override
+                    public void onSuccess(String url2) {
+                        friendProfileUrl = url2;
+                        attachChatListener();
+                    }
+                    @Override
+                    public void onError(Exception e) { attachChatListener(); }
+                });
+            }
+            @Override
+            public void onError(Exception e) { attachChatListener(); }
+        });
     }
 
-    private void loadMessages() {
-        messagesContainer.removeAllViews();
-        Cursor cursor = databaseHelper.getMessages(currentUsername, friendUsername);
+    private void attachChatListener() {
+        DatabaseReference chatRef = databaseHelper.getMessagesReference(currentUsername, friendUsername);
+        chatRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (isDestroyed() || isFinishing()) return;
+                messagesContainer.removeAllViews();
+                for (DataSnapshot msgSnap : snapshot.getChildren()) {
+                    Message msg = msgSnap.getValue(Message.class);
+                    if (msg != null) {
+                        appendMessage(msg);
+                    }
+                }
+                chatScrollView.post(() -> chatScrollView.fullScroll(ScrollView.FOCUS_DOWN));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
+    private void appendMessage(Message msg) {
+        String sender = msg.sender;
+        String content = msg.content;
+
+        LinearLayout rowLayout = new LinearLayout(this);
+        rowLayout.setOrientation(LinearLayout.HORIZONTAL);
         
-        int senderIndex = cursor.getColumnIndex("sender");
-        int contentIndex = cursor.getColumnIndex("content");
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        rowParams.setMargins(0, 8, 0, 8);
+        rowLayout.setLayoutParams(rowParams);
 
-        while (cursor.moveToNext()) {
-            String sender = cursor.getString(senderIndex);
-            String content = cursor.getString(contentIndex);
-
-            LinearLayout rowLayout = new LinearLayout(this);
-            rowLayout.setOrientation(LinearLayout.HORIZONTAL);
-            
-            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            rowParams.setMargins(0, 8, 0, 8);
-            rowLayout.setLayoutParams(rowParams);
-
-            ImageView profileIcon = new ImageView(this);
-            String imageUri = profileImageStore.getProfileImage(sender);
-            if (imageUri != null) {
-                profileIcon.setImageURI(android.net.Uri.parse(imageUri));
+        ImageView profileIcon = new ImageView(this);
+        String imageUri = sender.equals(currentUsername) ? currentProfileUrl : friendProfileUrl;
+        
+        if (imageUri != null && !imageUri.isEmpty()) {
+            if (imageUri.startsWith("http")) {
+                Glide.with(this).load(imageUri).into(profileIcon);
             } else {
-                profileIcon.setImageResource(R.drawable.ic_baseline_account_circle_24);
+                byte[] decodedString = Base64.decode(imageUri, Base64.DEFAULT);
+                Glide.with(this).load(decodedString).into(profileIcon);
             }
-            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(100, 100);
-            iconParams.setMargins(16, 0, 16, 0);
-            profileIcon.setLayoutParams(iconParams);
-            profileIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            // Optionally add a background circle like in dashboard
-            profileIcon.setBackgroundResource(R.drawable.profile_image_circle);
-            profileIcon.setClipToOutline(true);
-
-            TextView msgView = new TextView(this);
-            msgView.setText(content);
-            msgView.setTextSize(16f);
-            msgView.setTextColor(android.graphics.Color.parseColor("#1F2937"));
-            msgView.setPadding(32, 24, 32, 24);
-            
-            LinearLayout.LayoutParams msgParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            msgView.setLayoutParams(msgParams);
-
-            if (sender.equals(currentUsername)) {
-                // Sent message (Right side)
-                msgView.setBackgroundResource(R.drawable.menu_card_bg);
-                rowLayout.setGravity(Gravity.END);
-                rowLayout.addView(msgView);
-                rowLayout.addView(profileIcon);
-            } else {
-                // Received message (Left side)
-                msgView.setBackgroundColor(0xFFE0E0E0); // Light grey
-                rowLayout.setGravity(Gravity.START);
-                rowLayout.addView(profileIcon);
-                rowLayout.addView(msgView);
-            }
-            
-            messagesContainer.addView(rowLayout);
+        } else {
+            profileIcon.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }
-        cursor.close();
         
-        chatScrollView.post(() -> chatScrollView.fullScroll(ScrollView.FOCUS_DOWN));
-    }
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(100, 100);
+        iconParams.setMargins(16, 0, 16, 0);
+        profileIcon.setLayoutParams(iconParams);
+        profileIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        profileIcon.setBackgroundResource(R.drawable.profile_image_circle);
+        profileIcon.setClipToOutline(true);
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        databaseHelper.close();
+        TextView msgView = new TextView(this);
+        msgView.setText(content);
+        msgView.setTextSize(16f);
+        msgView.setTextColor(android.graphics.Color.parseColor("#1F2937"));
+        msgView.setPadding(32, 24, 32, 24);
+        
+        LinearLayout.LayoutParams msgParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        msgView.setLayoutParams(msgParams);
+
+        if (sender.equals(currentUsername)) {
+            // Sent message (Right side)
+            msgView.setBackgroundResource(R.drawable.menu_card_bg);
+            rowLayout.setGravity(Gravity.END);
+            rowLayout.addView(msgView);
+            rowLayout.addView(profileIcon);
+        } else {
+            // Received message (Left side)
+            msgView.setBackgroundColor(0xFFE0E0E0); // Light grey
+            rowLayout.setGravity(Gravity.START);
+            rowLayout.addView(profileIcon);
+            rowLayout.addView(msgView);
+        }
+        
+        messagesContainer.addView(rowLayout);
     }
 }
