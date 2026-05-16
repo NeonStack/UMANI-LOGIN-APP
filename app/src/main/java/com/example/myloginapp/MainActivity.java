@@ -9,6 +9,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
+import android.net.Uri;
+import android.media.MediaPlayer;
 
 import com.google.android.material.button.MaterialButton;
 import com.example.myloginapp.data.DatabaseHelper;
@@ -35,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        VideoView videoBackground = findViewById(R.id.videoBackground);
+        Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.bg_video);
+        videoBackground.setVideoURI(videoUri);
+        videoBackground.setOnPreparedListener(mp -> {
+            mp.setLooping(true);
+            videoBackground.start();
+        });
 
         usernameInput = findViewById(R.id.username);
         passwordInput = findViewById(R.id.password);
@@ -94,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String provider = databaseHelper.getProviderForUser(username);
+        
+        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.success_sound);
+        mediaPlayer.start();
+        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+
         sessionManager.saveSession(username, provider);
         openDashboard(username, provider);
         finish();

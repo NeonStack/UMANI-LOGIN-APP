@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_background">
+    android:background="@color/app_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,148 +12,231 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <ImageView
-            android:layout_width="82dp"
-            android:layout_height="82dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="8dp"
-            android:src="@drawable/epbe_logo" />
+        <!-- Profile Header Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/menu_card_bg"
+            android:padding="24dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="4dp">
 
+            <ImageView
+                android:id="@+id/profileImageView"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/profile_image_circle"
+                android:clipToOutline="true"
+                android:outlineProvider="background"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_baseline_account_circle_24" />
+
+            <TextView
+                android:id="@+id/welcomeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/app_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/providerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="14sp"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <!-- Actions Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
-            android:text="@string/app_tagline"
+            android:text="Discover &amp; Connect"
             android:textColor="@color/app_text_secondary"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dashboard_title"
-            android:textColor="@color/app_text_primary"
-            android:textSize="30sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="14dp" />
-
-        <TextView
-            android:id="@+id/welcomeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/app_text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/providerText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/app_text_secondary"
-            android:textSize="16sp"
-            android:textAlignment="center"
-            android:layout_marginBottom="20dp" />
-
-        <ImageView
-            android:id="@+id/profileImageView"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/profile_image_circle"
-            android:clipToOutline="true"
-            android:outlineProvider="background"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_baseline_account_circle_24" />
+            android:textAllCaps="true" />
 
+        <!-- Grid for Actions Row 1 -->
         <LinearLayout
-            android:id="@+id/uploadProfileBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/menu_card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:layout_marginBottom="12dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/upload_profile_picture"
-                android:textColor="@color/app_text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+            <!-- Find Friends -->
+            <LinearLayout
+                android:id="@+id/findFriendsBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/menu_card_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp"
+                android:elevation="2dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/upload_profile_hint"
-                android:textColor="@color/app_text_secondary" />
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    android:layout_marginBottom="8dp"
+                    app:tint="@color/app_button" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Find\nFriends"
+                    android:textColor="@color/app_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <!-- Messages -->
+            <LinearLayout
+                android:id="@+id/messagesBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/menu_card_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp"
+                android:elevation="2dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_dialog_email"
+                    android:layout_marginBottom="8dp"
+                    app:tint="@color/app_button" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chat\nMessages"
+                    android:textColor="@color/app_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+            </LinearLayout>
         </LinearLayout>
 
+        <!-- Actions Title 2 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Account Options"
+            android:textColor="@color/app_text_secondary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            android:textAllCaps="true" />
+
+        <!-- Grid for Actions Row 2 -->
         <LinearLayout
-            android:id="@+id/changePasswordBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/menu_card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:layout_marginBottom="24dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/change_password"
-                android:textColor="@color/app_text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+            <!-- Settings -->
+            <LinearLayout
+                android:id="@+id/settingsBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/menu_card_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp"
+                android:elevation="2dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/change_password_hint"
-                android:textColor="@color/app_text_secondary" />
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_menu_preferences"
+                    android:layout_marginBottom="8dp"
+                    app:tint="@color/app_button" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Account\nSettings"
+                    android:textColor="@color/app_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <!-- FAQs -->
+            <LinearLayout
+                android:id="@+id/faqsBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/menu_card_bg"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp"
+                android:elevation="2dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_menu_help"
+                    android:layout_marginBottom="8dp"
+                    app:tint="@color/app_button" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FAQs &amp;\nHelp"
+                    android:textColor="@color/app_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/deleteAccountBtn"
+        <!-- Spacer -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/menu_card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/delete_account"
-                android:textColor="@color/modal_error"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/delete_account_hint"
-                android:textColor="@color/app_text_secondary" />
-        </LinearLayout>
-
+        <!-- Logout Button -->
         <LinearLayout
             android:id="@+id/logoutBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/menu_card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="16dp"
+            android:elevation="2dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_lock_power_off"
+                android:layout_marginEnd="12dp"
+                app:tint="@color/app_text_secondary" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -160,13 +245,6 @@
                 android:textColor="@color/app_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/logout_hint"
-                android:textColor="@color/app_text_secondary" />
         </LinearLayout>
 
     </LinearLayout>

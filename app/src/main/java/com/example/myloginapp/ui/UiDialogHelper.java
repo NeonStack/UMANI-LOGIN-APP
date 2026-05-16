@@ -64,6 +64,20 @@ public class UiDialogHelper {
         dialog.show();
     }
 
+    public static void showFaqs(AppCompatActivity activity) {
+        Dialog dialog = new Dialog(activity);
+        View view = LayoutInflater.from(activity).inflate(R.layout.dialog_faqs, null);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        MaterialButton okButton = view.findViewById(R.id.dialogOkBtn);
+        okButton.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
     public static void showConfirm(
             AppCompatActivity activity,
             String title,

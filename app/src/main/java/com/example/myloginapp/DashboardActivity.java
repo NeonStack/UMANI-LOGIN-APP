@@ -55,47 +55,29 @@ public class DashboardActivity extends AppCompatActivity {
         TextView welcomeText = findViewById(R.id.welcomeText);
         TextView providerText = findViewById(R.id.providerText);
         profileImageView = findViewById(R.id.profileImageView);
-        View uploadProfileBtn = findViewById(R.id.uploadProfileBtn);
-        View changePasswordBtn = findViewById(R.id.changePasswordBtn);
-        View deleteAccountBtn = findViewById(R.id.deleteAccountBtn);
+        View findFriendsBtn = findViewById(R.id.findFriendsBtn);
+        View messagesBtn = findViewById(R.id.messagesBtn);
+        View settingsBtn = findViewById(R.id.settingsBtn);
+        View faqsBtn = findViewById(R.id.faqsBtn);
         View logoutBtn = findViewById(R.id.logoutBtn);
 
         welcomeText.setText(getString(R.string.welcome_label, currentUsername));
         providerText.setText(getString(R.string.provider_label, currentProvider));
-        loadProfileImage();
 
-        boolean isLocalUser = "local".equalsIgnoreCase(currentProvider);
-        changePasswordBtn.setVisibility(isLocalUser ? View.VISIBLE : View.GONE);
-
-        uploadProfileBtn.setOnClickListener(v -> openImagePicker());
-
-        changePasswordBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, ChangePasswordActivity.class);
-            intent.putExtra(ChangePasswordActivity.EXTRA_USERNAME, currentUsername);
-            intent.putExtra(ChangePasswordActivity.EXTRA_PROVIDER, currentProvider);
-            startActivity(intent);
+        settingsBtn.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, SettingsActivity.class));
         });
 
-        deleteAccountBtn.setOnClickListener(v -> {
-            UiDialogHelper.showConfirm(
-                    this,
-                    getString(R.string.delete_confirm_title),
-                    getString(R.string.delete_confirm_message),
-                    () -> {
-                boolean deleted = databaseHelper.deleteUser(currentUsername);
-                if (deleted) {
-                    profileImageStore.clearProfileImage(currentUsername);
-                    sessionManager.clearSession();
-                    UiDialogHelper.showStatus(
-                            this,
-                            UiDialogHelper.Type.SUCCESS,
-                            getString(R.string.status_success),
-                            getString(R.string.account_deleted),
-                            this::goToLogin
-                    );
-                }
-                    }
-            );
+        findFriendsBtn.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, FindFriendsActivity.class));
+        });
+
+        messagesBtn.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, ChatListActivity.class));
+        });
+
+        faqsBtn.setOnClickListener(v -> {
+            UiDialogHelper.showFaqs(this);
         });
 
         logoutBtn.setOnClickListener(v -> {
@@ -104,12 +86,10 @@ public class DashboardActivity extends AppCompatActivity {
         });
     }
 
-    private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/*");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        startActivityForResult(intent, REQUEST_PROFILE_IMAGE);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadProfileImage();
     }
 
     private void loadProfileImage() {
@@ -119,25 +99,6 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         }
         profileImageView.setImageURI(Uri.parse(savedUri));
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQUEST_PROFILE_IMAGE || resultCode != RESULT_OK || data == null || data.getData() == null) {
-            return;
-        }
-
-        Uri imageUri = data.getData();
-        final int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        try {
-            getContentResolver().takePersistableUriPermission(imageUri, flags);
-        } catch (SecurityException ignored) {
-            // Persisted permission is best-effort; image can still work for current session.
-        }
-
-        profileImageStore.saveProfileImage(currentUsername, imageUri.toString());
-        profileImageView.setImageURI(imageUri);
     }
 
     private void goToLogin() {
